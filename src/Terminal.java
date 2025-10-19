@@ -99,6 +99,10 @@ public class Terminal {
     	case "rmdir":
     		rmdir();
     		break;
+		
+		case "cp -r":
+			cpDashR();
+			break;
     	}
     }
 
