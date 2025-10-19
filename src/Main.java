@@ -1,13 +1,21 @@
+import java.util.Scanner;
+
 public class Main {
 	
     public static void main(String[] args) {
-       Parser pp = new Parser();
-       pp.parse("echo Abdallah Kareem");
-       System.out.println(pp.getCommandName());
-       System.out.println();
-       String[] ss = pp.getArgs();
-       for(String rr : ss) {
-    	   System.out.println(rr);
-       }
+        Terminal terminal = new Terminal();
+        Scanner input = new Scanner(System.in);
+
+        while (true) {
+            String text = input.nextLine();
+
+            if (text.equalsIgnoreCase("exit")) break;
+
+            if (terminal.parser.parse(text)) {
+                terminal.chooseCommandAction();
+            } else {
+                System.out.println("Invalid command.");
+            }
+        }
     }
 }
