@@ -53,33 +53,42 @@ public class Terminal {
 
 	// cp -r command: copy folders and subfolders
 	public void cpDashR() {
-		String[] paths = parser.getArgs();
-		if(paths.length != 2){
-			throw new IllegalArgumentException("Invalid number of arguments");
-		}
-
-		Path source = Paths.get(paths[0]);
-		Path dest = Paths.get(paths[1]);
-
-		
 		try{
-			Files.walk(source).forEach(src -> {
-				Path target = dest.resolve(source.relativize(src));
-				try{
-					if (Files.isDirectory(src)) {
-						if (Files.notExists(target)) {
-							Files.createDirectories(target);
+			String[] paths = parser.getArgs();
+			
+			if(paths.length != 2){
+				throw new IllegalArgumentException("Invalid number of arguments");
+			}
+
+			Path source = Paths.get(paths[0]);
+			Path dest = Paths.get(paths[1]);
+
+			
+			try{
+				Files.walk(source).forEach(src -> {
+					Path target = dest.resolve(source.relativize(src));
+					try{
+						if (Files.isDirectory(src)) {
+							if (Files.notExists(target)) {
+								Files.createDirectories(target);
+							}
+						}else{
+							Files.copy(src, target , StandardCopyOption.REPLACE_EXISTING);
 						}
-					}else{
-						Files.copy(src, target , StandardCopyOption.REPLACE_EXISTING);
+					}catch (Exception e){
+						e.printStackTrace();
 					}
-				}catch (Exception e){
-					e.printStackTrace();
-				}
-			});
+				});
+			}catch (Exception e){
+				e.printStackTrace();
+			}
+
 		}catch (Exception e){
-			e.printStackTrace();
+			System.out.println(e.getMessage());
+			return;
 		}
+		
+		System.out.println("Copy completed successfully.");
 	}
 
     //This method will choose the suitable command method to be called
@@ -100,7 +109,7 @@ public class Terminal {
     		rmdir();
     		break;
 		
-		case "cp -r":
+		case "cp-r":
 			cpDashR();
 			break;
     	}
