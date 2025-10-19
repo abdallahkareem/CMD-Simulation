@@ -15,7 +15,5 @@ public class Terminal {
     public void chooseCommandAction(){
     	
     }
-    public static void main(String[] args){
-    	
-    }
+
 }
