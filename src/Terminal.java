@@ -29,7 +29,29 @@ public class Terminal {
     }
 	
     public void cd(String[] args){
-    	
+    	try {
+            if (args.length == 0) {
+                System.setProperty("user.dir", System.getProperty("user.home"));
+            } else if (args.length == 1 && args[0].equals("..")) {
+                Path current = Paths.get(System.getProperty("user.dir"));
+                Path parent = current.getParent();
+                if (parent != null)
+                    System.setProperty("user.dir", parent.toString());
+            } else if (args.length == 1) {
+                Path newPath = Paths.get(args[0]);
+                if (!newPath.isAbsolute())
+                    newPath = Paths.get(System.getProperty("user.dir")).resolve(newPath);
+                if (Files.exists(newPath) && Files.isDirectory(newPath))
+                    System.setProperty("user.dir", newPath.normalize().toString());
+                else
+                    System.out.println("Error: invalid directory path");
+            } else {
+                System.out.println("Error: too many arguments");
+            }
+            System.out.println("Current directory: " + System.getProperty("user.dir"));
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
     
     // rmdir command: remove the empty Folders(Directories)
