@@ -3,6 +3,7 @@ import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.*;
@@ -190,6 +191,34 @@ public class Terminal {
 			System.out.println(e.getMessage());
 		}
 		
+	}
+
+	// cat command : print a single file or takes two files concatanate and print them
+	public void cat(){
+		try {
+			String[] args = parser.getArgs();
+			if (args.length == 1) {
+				File file = new File(args[0]);
+				if (!file.exists()) {
+					throw new FileNotFoundException("the file is not found");
+				}
+				// Scanner scan = new Scanner(file);
+				// while (scan.hasNextLine()) {
+				// 	String line = scan.nextLine();
+				// 	System.out.println(line);
+				// }
+				// scan.close();
+				
+			}else if (args.length == 2) {
+				Path file1 = Paths.get(args[0]);
+				Path file2 = Paths.get(args[1]);
+				// concatanate the files and print them
+			}else{
+				throw new IllegalArgumentException("cat command needs 1 or 2 arguments");
+			}
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
     //This method will choose the suitable command method to be called
