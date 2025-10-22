@@ -1,11 +1,17 @@
 import java.util.Arrays;
 import java.util.Scanner;
+<<<<<<< Updated upstream
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+=======
+import java.util.stream.Stream;
+import java.io.File;
+import java.io.FileNotFoundException;
+>>>>>>> Stashed changes
 import java.nio.file.*;
 
 public class Terminal {
