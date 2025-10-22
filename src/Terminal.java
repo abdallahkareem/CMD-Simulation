@@ -53,7 +53,28 @@ public class Terminal {
             System.out.println("Error: " + e.getMessage());
         }
     }
-    
+
+	public void zip() {
+        String[] args = parser.getArgs();
+        try {
+            if (args.length < 2) {
+                System.out.println("Error: zip requires files");
+                return;
+            }
+            boolean recursive = args[0].equals("-r");
+            String zipName = recursive ? args[1] : args[0];
+            if (recursive) {
+                String dirName = args[2];
+                zipDirectory(Paths.get(dirName), Paths.get(zipName));
+            } else {
+                zipFiles(Arrays.copyOfRange(args, 1, args.length), zipName);
+            }
+        } catch (Exception e) {
+            System.out.println("Error zipping");
+        }
+    }
+
+	
     // rmdir command: remove the empty Folders(Directories)
     public void rmdir() {
     	
