@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.stream.Stream;
 import java.nio.file.*;
+import java.io.*;
+
 
 public class Terminal {
     Parser parser;
@@ -211,7 +213,7 @@ public class Terminal {
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
-		
+
 	}
 
 	// cat command : print a single file or takes two files concatanate and print them
@@ -243,7 +245,8 @@ public class Terminal {
 		}
 	}
 
-    public void ls() {
+
+	public void ls() {
 		File currentDir = new File(System.getProperty("user.dir"));
 		File[] files = currentDir.listFiles();
 
@@ -260,46 +263,54 @@ public class Terminal {
 			}
 		}
 	}
-    //This method will choose the suitable command method to be called
+
+	public void wc() {
+		String[] args = parser.getArgs();
+
+		if (args.length != 1) {
+			System.out.println("Usage: wc <filename>");
+			return;
+		}
+
+		File file = new File(args[0]);
+		if (!file.exists() || file.isDirectory()) {
+			System.out.println("Error: file not found");
+			return;
+		}
+
+		int lines = 0, words = 0, bytes = 0;
+
+		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				lines++;
+				words += line.split("\\s+").length;
+				bytes += line.getBytes().length + 1; // +1 for newline
+			}
+		} catch (IOException e) {
+			System.out.println("Error reading file: " + e.getMessage());
+			return;
+		}
+
+		System.out.println(lines + " " + words + " " + bytes + " " + file.getName());
+	}
+
+	//This method will choose the suitable command method to be called
     public void chooseCommandAction(){
     	String cmd = parser.getCommandName();
-    	
-    	
+
+
     	switch(cmd) {
-    	case "echo":
-    		echo();
-    		break;
-    		
-    	case "pwd":
-    		System.out.println(pwd());
-    		break;
-    		
-    	case "rmdir":
-    		rmdir();
-    		break;
-		
-		case "cp":
-			copy();
-			break;
-
-        case "cd":
-            cd(parser.getArgs());
-            break;
-
-        case "zip":
-            zip();
-            break;
-
-		case "ls":
-			ls();
-			break;
-		case "touch":
-			touch();
-			break;
-        
-        case "cat":
-        cat();
-        break;
+			case "echo": echo(); break;
+			case "pwd": System.out.println(pwd()); break;
+			case "rmdir": rmdir(); break;
+			case "cp": copy(); break;
+			case "cd": cd(parser.getArgs()); break;
+			case "zip": zip(); break;
+			case "ls": ls(); break;
+			case "touch": touch(); break;
+			case "cat": cat(); break;
+			case "wc": wc(); break;
     	}
     }
 
