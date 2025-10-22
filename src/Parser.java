@@ -19,9 +19,11 @@ public class Parser {
 		for(int i = 1 ; i < tokens.length ; i++) {
 			args[i - 1] = tokens[i];
 		}
+
 		isParsed = true;
     	return isParsed;
     }
+
     public String getCommandName(){
 		return commandName;
     	
