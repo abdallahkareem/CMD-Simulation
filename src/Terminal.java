@@ -166,6 +166,26 @@ public class Terminal {
 		}
 	}
 
+	public void touch() {
+		String[] args = parser.getArgs();
+
+		if (args.length != 1) {
+			System.out.println("Usage: touch <filename>");
+			return;
+		}
+
+		File file = new File(args[0]);
+		try {
+			if (file.createNewFile()) {
+				System.out.println("File created: " + file.getName());
+			} else {
+				System.out.println("File already exists.");
+			}
+		} catch (IOException e) {
+			System.out.println("Error creating file: " + e.getMessage());
+		}
+	}
+
 
 	// function to handle the cp command
 	public void copy(){
@@ -272,6 +292,9 @@ public class Terminal {
 
 		case "ls":
 			ls();
+			break;
+		case "touch":
+			touch();
 			break;
         
         case "cat":
