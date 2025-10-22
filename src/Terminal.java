@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -6,6 +7,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.stream.Stream;
+=======
+import java.util.Scanner;
+import java.util.stream.Stream;
+import java.io.File;
+import java.io.FileNotFoundException;
+>>>>>>> Stashed changes
 import java.nio.file.*;
 
 public class Terminal {
@@ -198,12 +205,16 @@ public class Terminal {
 	public void cat(){
 		try {
 			String[] args = parser.getArgs();
+<<<<<<< Updated upstream
             // 1 argument
+=======
+>>>>>>> Stashed changes
 			if (args.length == 1) {
 				File file = new File(args[0]);
 				if (!file.exists()) {
 					throw new FileNotFoundException("the file is not found");
 				}
+<<<<<<< Updated upstream
                 Stream<String> lines = Files.lines(Paths.get(args[0]));
                 lines.forEach(System.out::println); 
                 // 2 arguments
@@ -217,6 +228,19 @@ public class Terminal {
                 Stream<String> file2Lines = Files.lines(Paths.get(args[1]));
 				file1Lines.forEach(System.out::println);
                 file2Lines.forEach(System.out::println);
+=======
+				// Scanner scan = new Scanner(file);
+				// while (scan.hasNextLine()) {
+				// 	String line = scan.nextLine();
+				// 	System.out.println(line);
+				// }
+				// scan.close();
+				
+			}else if (args.length == 2) {
+				Path file1 = Paths.get(args[0]);
+				Path file2 = Paths.get(args[1]);
+				// concatanate the files and print them
+>>>>>>> Stashed changes
 			}else{
 				throw new IllegalArgumentException("cat command needs 1 or 2 arguments");
 			}
@@ -225,6 +249,7 @@ public class Terminal {
 		}
 	}
 
+<<<<<<< Updated upstream
     public void ls() {
 		File currentDir = new File(System.getProperty("user.dir"));
 		File[] files = currentDir.listFiles();
@@ -243,6 +268,8 @@ public class Terminal {
 		}
 	}
 
+=======
+>>>>>>> Stashed changes
     //This method will choose the suitable command method to be called
     public void chooseCommandAction(){
     	String cmd = parser.getCommandName();
