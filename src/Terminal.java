@@ -74,6 +74,36 @@ public class Terminal {
         }
     }
 
+	private void zipFiles(String[] files, String zipName) throws IOException {
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipName))) {
+            for (String file : files) {
+                Path f = Paths.get(file);
+                if (!f.isAbsolute())
+                    f = Paths.get(System.getProperty("user.dir")).resolve(f);
+                zos.putNextEntry(new ZipEntry(f.getFileName().toString()));
+                Files.copy(f, zos);
+                zos.closeEntry();
+            }
+        }
+        System.out.println("Zip created: " + zipName);
+    }
+
+    private void zipDirectory(Path sourceDir, Path zipFile) throws IOException {
+        try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile.toFile()))) {
+            Files.walk(sourceDir).forEach(path -> {
+                try {
+                    String entry = sourceDir.relativize(path).toString();
+                    if (Files.isDirectory(path)) return;
+                    zos.putNextEntry(new ZipEntry(entry));
+                    Files.copy(path, zos);
+                    zos.closeEntry();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        System.out.println("Directory zipped successfully.");
+    }
 	
     // rmdir command: remove the empty Folders(Directories)
     public void rmdir() {
