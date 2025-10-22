@@ -166,6 +166,25 @@ public class Terminal {
 		}
 	}
 
+	public void ls() {
+		File currentDir = new File(System.getProperty("user.dir"));
+		File[] files = currentDir.listFiles();
+
+		if (files == null) {
+			System.out.println("Error reading directory");
+			return;
+		}
+
+		for (File f : files) {
+			if (f.isDirectory()) {
+				System.out.println("[DIR]  " + f.getName());
+			} else {
+				System.out.println("       " + f.getName());
+			}
+		}
+	}
+
+
 	// function to handle the cp command
 	public void copy(){
 		try {
@@ -250,6 +269,10 @@ public class Terminal {
         case "zip":
             zip();
             break;
+
+		case "ls":
+			ls();
+			break;
     	}
     }
 
