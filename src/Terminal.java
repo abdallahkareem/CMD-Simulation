@@ -1,10 +1,7 @@
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.stream.Stream;
 import java.nio.file.*;
 import java.io.*;
@@ -294,6 +291,110 @@ public class Terminal {
 
 		System.out.println(lines + " " + words + " " + bytes + " " + file.getName());
 	}
+	public boolean isPath(String s) {
+        return s.contains("/") || s.contains("\\");
+    }
+
+    public void mkdir() {
+        String[] args = parser.getArgs();
+        for (String dir : args) {
+            File newDir;
+            if (isPath(dir)) {
+                newDir = new File(dir);
+            }
+            else {
+                String currentDir = System.getProperty("user.dir");
+                newDir = new File(currentDir, dir);
+            }
+            try {
+                if (newDir.exists()) {
+                    System.out.println("Directory already exists: " + newDir.getAbsolutePath());
+                }
+                else if (newDir.mkdirs()) {
+                    System.out.println("Directory created: " + newDir.getAbsolutePath());
+                }
+                else {
+                    System.out.println("Failed to create: " + newDir.getAbsolutePath());
+                }
+            }
+            catch (Exception e) {
+                System.out.println("An unexpected error occurred while creating " + newDir.getAbsolutePath());
+            }
+
+        }
+    }
+    public void rm() {
+        String[] args = parser.getArgs();
+
+        if (args.length == 1) {
+            Path path = Paths.get(args[0]);
+            try {
+                Files.delete(path);
+                System.out.println("File or directory deleted!");
+            }
+            catch (IOException e) {
+                System.out.println("Error deleting: " + e.getMessage());
+            }
+            catch (Exception e) {
+                System.out.println("Unexpected error: " + e.getMessage());
+            }
+        }
+        else {
+            System.out.println("Usage: rm <filename or directory>");
+        }
+    }
+    public void unzip() {
+        System.out.println("Arguments:");
+        String[] args = parser.getArgs();
+        String currentDir = System.getProperty("user.dir");
+        File dir;
+        try {
+            if (args.length == 1) {
+                dir = new File(currentDir);
+            } else if (args.length > 1) {
+                String cleanedDest = args[args.length - 1].replace("\"", "");
+                dir = new File(cleanedDest);
+            } else {
+                throw new IllegalArgumentException("Usage: unzip <zip-file> [destination-folder]");
+            }
+
+            String zipFilePath = args[0].replace("\"", "");
+            Path zipPath = Paths.get(zipFilePath);
+
+            if (!Files.exists(zipPath)) {
+                throw new FileNotFoundException("ZIP file not found!");
+            }
+
+            if (!dir.exists()) {
+                Files.createDirectories(dir.toPath());
+            }
+
+            try (ZipInputStream zip = new ZipInputStream(new FileInputStream(zipPath.toFile()))) {
+                ZipEntry entry;
+                while ((entry = zip.getNextEntry()) != null) {
+                    Path newPath = dir.toPath().resolve(entry.getName());
+                    if (entry.isDirectory()) {
+                        Files.createDirectories(newPath);
+                    } else {
+                        if (newPath.getParent() != null) {
+                            Files.createDirectories(newPath.getParent());
+                        }
+                        Files.copy(zip, newPath, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    zip.closeEntry();
+                }
+                System.out.println("Unzip completed successfully!");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        } catch (FileNotFoundException e) {
+            System.out.println("Error: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("I/O Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Unexpected error: " + e.getMessage());
+        }
+    }
 
 	//This method will choose the suitable command method to be called
     public void chooseCommandAction(){
@@ -311,6 +412,9 @@ public class Terminal {
 			case "touch": touch(); break;
 			case "cat": cat(); break;
 			case "wc": wc(); break;
+			case "mkdir": mkdir(); break;
+            case "rm" : rm(); break;
+            case "unzip": unzip();break;
     	}
     }
 
