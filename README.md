@@ -51,3 +51,10 @@ The interpreter supports redirecting output to files:
 echo Hello World > myfile.txt      # creates myfile.txt
 echo Appending line >> myfile.txt  # appends to myfile.txt
 ls > files.txt                     # saves directory listing
+
+---
+
+## ⚙️ How to Run
+1. Open the project in **Eclipse** or any Java IDE.
+2. Ensure the working directory is writable (for creating and deleting files/folders).
+3. Run the `Main` class (or the `Terminal` class if it contains a `main()` method)
