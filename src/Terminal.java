@@ -16,15 +16,42 @@ public class Terminal {
 
     //Implement each command in a method, for example:
     
-    
+    public void writeToFile(String[] args, String operand, String filename) {
+        String str = String.join("", args);
+
+        try {
+            if (operand.equals(">")) {
+                Files.write(Paths.get(filename), str.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            } else if (operand.equals(">>")) {
+                Files.write(Paths.get(filename), str.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
     // echo command: prints the arguments
     public void echo() {
-        String[] ss = parser.getArgs();
+    String[] ss = parser.getArgs();
+
+    if (ss.length >= 2 && (ss[ss.length - 2].equals(">") || ss[ss.length - 2].equals(">>"))) {
+        String[] newSS = Arrays.copyOfRange(ss, 0, ss.length - 2);
+        writeToFile(newSS, ss[ss.length - 2], ss[ss.length - 1]);
+
+        for (String rr : newSS) {
+            System.out.print(rr + " ");
+        }
+        System.out.println();
+    } else {
         for (String rr : ss) {
             System.out.print(rr + " ");
         }
         System.out.println();
     }
+}
+
     
     // pwd command: give me the current path
     public String pwd(){
@@ -221,9 +248,7 @@ public class Terminal {
 	public void copy(){
 		try {
 			String[] paths = parser.getArgs();
-
 			if (paths[0].equals("-r")) {
-
 				if (paths.length != 3) {
 					throw new IllegalArgumentException("invalid number of arguments");
 				}
@@ -245,52 +270,85 @@ public class Terminal {
 	}
 
 	// cat command : print a single file or takes two files concatanate and print them
-	public void cat(){
-		try {
-			String[] args = parser.getArgs();
-			if (args.length == 1) {
-				File file = new File(args[0]);
-				if (!file.exists()) {
-					throw new FileNotFoundException("the file is not found");
-				}
-                Stream<String> lines = Files.lines(Paths.get(args[0]));
-                lines.forEach(System.out::println);
-			}else if (args.length == 2) {
-				File file1 = new File(args[0]);
-                File file2 = new File(args[1]);
-                if (!file1.exists() || !file2.exists()) {
-                    throw new FileNotFoundException("the file is not found");
-                }
-                Stream<String> file1Lines = Files.lines(Paths.get(args[0]));
-                Stream<String> file2Lines = Files.lines(Paths.get(args[1]));
-				file1Lines.forEach(System.out::println);
-                file2Lines.forEach(System.out::println);
-			}else{
-				throw new IllegalArgumentException("cat command needs 1 or 2 arguments");
-			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-	}
+	public void cat() {
+    try {
+        String[] args = parser.getArgs();
+
+        if (args.length == 0) {
+            throw new IllegalArgumentException("cat command needs at least 1 file");
+        }
+
+        String operand = null;
+        String outputFile = null;
+        int fileCount = args.length;
+
+        if (args.length >= 2 && (args[args.length - 2].equals(">") || args[args.length - 2].equals(">>"))) {
+            operand = args[args.length - 2];
+            outputFile = args[args.length - 1];
+            fileCount = args.length - 2; 
+        }
+
+        StringBuilder output = new StringBuilder();
+
+        for (int i = 0; i < fileCount; i++) {
+            Path path = Paths.get(args[i]);
+            if (!Files.exists(path)) {
+                throw new FileNotFoundException("File not found: " + args[i]);
+            }
+
+            try (Stream<String> lines = Files.lines(path)) {
+                lines.forEach(line -> output.append(line).append(System.lineSeparator()));
+            }
+        }
+
+        System.out.print(output.toString());
+
+        if (operand != null && outputFile != null) {
+            writeToFile(new String[]{output.toString()}, operand, outputFile);
+        }
+
+    } catch (Exception e) {
+        System.out.println(e.getMessage());
+    }
+}
+
 
 
 	public void ls() {
-		File currentDir = new File(System.getProperty("user.dir"));
-		File[] files = currentDir.listFiles();
+    try {
+        String[] args = parser.getArgs();
+        StringBuilder output = new StringBuilder();
 
-		if (files == null) {
-			System.out.println("Error reading directory");
-			return;
-		}
+        File currentDir = new File(System.getProperty("user.dir"));
+        File[] files = currentDir.listFiles();
 
-		for (File f : files) {
-			if (f.isDirectory()) {
-				System.out.println("[DIR]  " + f.getName());
-			} else {
-				System.out.println("       " + f.getName());
-			}
-		}
-	}
+        if (files == null) {
+            System.out.println("Error reading directory");
+            return;
+        }
+
+        for (File f : files) {
+            if (f.isDirectory()) {
+                output.append("[DIR]  ").append(f.getName()).append("\n");
+            } else {
+                output.append("       ").append(f.getName()).append("\n");
+            }
+        }
+
+        System.out.print(output.toString());
+
+        if (args.length >= 2 && (args[0].equals(">") || args[0].equals(">>"))) {
+            String operand = args[0];
+            String filename = args[1];
+
+            writeToFile(new String[]{output.toString()}, operand, filename);
+        }
+
+    } catch (Exception e) {
+        System.out.println(e.getMessage());
+    }
+}
+
 
 	public void wc() {
 		String[] args = parser.getArgs();
