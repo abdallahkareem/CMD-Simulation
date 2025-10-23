@@ -110,24 +110,55 @@ public class Terminal {
         System.out.println("Directory zipped successfully.");
     }
 	
-    // rmdir command: remove the empty Folders(Directories)
+ // rmdir command: remove the empty Folders(Directories)
     public void rmdir() {
-    	
-    	String arg = parser.getArgs()[0]; // the element in the args
-    	File dir = new File(arg);
-    	
-    	if(parser.getArgs().length != 1) {
-    		System.out.println("Error: rmdir takes only one argument");
-    	}
-    	else {
-    		if(arg.equals("*")) {
-    			// waiting
-    		}
-    		
-    	    if (dir.isDirectory() && dir.delete()) {
-    	        System.out.println("Directory deleted successfully");
-    	    }
-    	}
+
+        if (parser.getArgs().length != 1) {
+            System.out.println("Error: rmdir takes only one argument");
+            return;
+        }
+
+        String arg = parser.getArgs()[0]; // the element in the args
+        File dir = new File(arg);
+
+        // Special case: delete all empty directories in the current working directory
+        if (arg.equals("*")) {
+            File currentDir = new File(pwd());
+            File[] files = currentDir.listFiles();
+
+            if (files != null && files.length > 0) {
+                boolean foundEmpty = false;
+                for (File f : files) {
+                    if (f.isDirectory() && f.list().length == 0) {
+                        if (f.delete()) {
+                            System.out.println("Deleted empty directory: " + f.getName());
+                            foundEmpty = true;
+                        }
+                    }
+                }
+                if (!foundEmpty) {
+                    System.out.println("No empty directories found to delete.");
+                }
+            } else {
+                System.out.println("No directories found in current folder.");
+            }
+            return;
+        }
+
+        // Normal single-directory delete
+        if (dir.isDirectory() && dir.exists()) {
+            if (dir.list().length == 0) {
+                if (dir.delete()) {
+                    System.out.println("Directory deleted successfully.");
+                } else {
+                    System.out.println("Error: Could not delete directory.");
+                }
+            } else {
+                System.out.println("Directory not empty to delete.");
+            }
+        } else {
+            System.out.println("Error: Directory does not exist or invalid path.");
+        }
     }
 
 	// cp -r command: copy folders and subfolders and files
@@ -395,6 +426,8 @@ public class Terminal {
             System.out.println("Unexpected error: " + e.getMessage());
         }
     }
+    
+    
 
 	//This method will choose the suitable command method to be called
     public void chooseCommandAction(){
