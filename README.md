@@ -1,14 +1,14 @@
-# 🖥️ Project – Command Line Interpreter
+# Project – Command Line Interpreter
 
-## 📘 Overview
+## Overview
 This project implements a **Command Line Interpreter (CLI)** in Java that simulates basic shell operations similar to Linux and Windows terminals.  
 It supports file and directory manipulation, text redirection, file compression, and command output handling.
 
 ---
 
-## 🧩 Features
+## Features
 
-### 🔹 Core Capabilities
+### Core Capabilities
 - Parse and execute built-in commands.
 - Support for **arguments with spaces** using quotes `" "`.
 - Clear error messages for invalid commands or incorrect usage.
@@ -17,7 +17,7 @@ It supports file and directory manipulation, text redirection, file compression,
 
 ---
 
-## 🧰 Supported Commands
+## Supported Commands
 
 | Command | Description | Example |
 |----------|--------------|----------|
@@ -39,7 +39,7 @@ It supports file and directory manipulation, text redirection, file compression,
 
 ---
 
-## 🔄 Output Redirection
+## Output Redirection
 
 The interpreter supports redirecting output to files:
 
