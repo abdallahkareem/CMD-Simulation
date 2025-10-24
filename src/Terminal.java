@@ -17,7 +17,7 @@ public class Terminal {
     //Implement each command in a method, for example:
     
     public void writeToFile(String[] args, String operand, String filename) {
-        String str = String.join("", args);
+        String str = String.join(" ", args);
 
         try {
             if (operand.equals(">")) {
@@ -32,30 +32,33 @@ public class Terminal {
 
 
 
-    // echo command: prints the arguments
+ // echo command: prints the arguments
     public void echo() {
-    String[] ss = parser.getArgs();
+        String[] ss = parser.getArgs();
 
-    if (ss.length >= 2 && (ss[ss.length - 2].equals(">") || ss[ss.length - 2].equals(">>"))) {
-        String[] newSS = Arrays.copyOfRange(ss, 0, ss.length - 2);
-        writeToFile(newSS, ss[ss.length - 2], ss[ss.length - 1]);
+        // Check if redirection operator exists (">" or ">>")
+        if (ss.length >= 2 && (ss[ss.length - 2].equals(">") || ss[ss.length - 2].equals(">>"))) {
+            String operator = ss[ss.length - 2];
+            String fileName = ss[ss.length - 1];
+            String[] newSS = Arrays.copyOfRange(ss, 0, ss.length - 2);
 
-        for (String rr : newSS) {
-            System.out.print(rr + " ");
+            // Write to file only (do not print in console)
+            writeToFile(newSS, operator, fileName);
+        } 
+        else {
+            // Print to console only
+            for (String rr : ss) {
+                System.out.print(rr + " ");
+            }
+            System.out.println();
         }
-        System.out.println();
-    } else {
-        for (String rr : ss) {
-            System.out.print(rr + " ");
-        }
-        System.out.println();
     }
-}
+
 
     
     // pwd command: give me the current path
     public String pwd(){
-    	String path = Paths.get("").toAbsolutePath().toString();
+    	String path = System.getProperty("user.dir");
 		return path;
     	
     }
@@ -334,14 +337,17 @@ public class Terminal {
                 output.append("       ").append(f.getName()).append("\n");
             }
         }
-
-        System.out.print(output.toString());
+        
 
         if (args.length >= 2 && (args[0].equals(">") || args[0].equals(">>"))) {
             String operand = args[0];
             String filename = args[1];
 
             writeToFile(new String[]{output.toString()}, operand, filename);
+        }
+        else {
+        	
+        	System.out.print(output.toString());
         }
 
     } catch (Exception e) {
