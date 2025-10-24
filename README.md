@@ -33,7 +33,6 @@ It supports file and directory manipulation, text redirection, file compression,
 | `wc` | Displays the number of lines, words, and characters in a file. | `wc myfile.txt` |
 | `zip` | Compresses one or more files into a `.zip` archive. | `zip archive.zip file1.txt file2.txt` |
 | `unzip` | Extracts files from a `.zip` archive. | `unzip archive.zip` |
-| `help` | Lists all available commands with usage information. | `help` |
 | `cp` | copy a file content to another file. | `cp copyFrom.txt copyTo.txt` |
 | `cp -r` | copy a directory content to another directory. | `cp -r d:\copyFrom p:\copyTo` |
 
