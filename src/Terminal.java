@@ -1,3 +1,40 @@
+/**
+ * =============================================================
+ *  Project Name: Command Line Interpreter (CLI)
+ *  File Name: Terminal.java
+ *  Version: 1.0
+ *  Date: October 2025
+ *  =============================================================
+ *  Description:
+ *  -----------------
+ *  This project is an implementation of a simplified Command Line Interpreter (CLI)
+ *  in Java. It simulates a Linux-like terminal environment that supports multiple
+ *  built-in commands such as `echo`, `pwd`, `ls`, `cd`, `cp`, `rmdir`, `mkdir`,
+ *  `cat`, `wc`, `touch`, `zip`, `unzip`, and `rm`. 
+ *
+ *  The system supports input/output redirection using `>` and `>>`,
+ *  allowing users to write command outputs into files or append them.
+ *
+ *  Major Features:
+ *  -----------------
+ *  - File and directory management (mkdir, rmdir, rm, cp, touch)
+ *  - Input/output redirection (>, >>)
+ *  - File reading and concatenation (cat, wc)
+ *  - File compression/decompression (zip, unzip)
+ *  - Navigation commands (cd, pwd)
+ *  - Echo command to display or write text
+ *
+ *  =============================================================
+ *  Authors:
+ *  -----------------
+ *  - Abdallah Kareem Abdallah — ID: 20230228
+ *  - Ahmed Mohammed Ahmed — ID: 20231103
+ *  - Reyad Youssef Ebrahim — ID: 20230143
+ *  - Hady Hassan Ahmed — ID: 20230454
+ *  - Abdallah Alaa Ahmed — ID: 20231013
+ *  =============================================================
+ */
+
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -6,39 +43,84 @@ import java.util.stream.Stream;
 import java.nio.file.*;
 import java.io.*;
 
+
+/**
+ * The {@code Terminal} class is the core component of the Command Line Interpreter project.
+ * It provides implementations for common Linux-like commands and manages command parsing,
+ * execution, and file system interactions.
+ */
 public class Terminal {
     Parser parser;
+
 
     public Terminal() {
         parser = new Parser();
     }
 
-    public void writeToFile(String[] args, String operand, String filename) {
+    // ---------------------------
+    // Redirection Functions
+    // ---------------------------
+
+    // For ">" — overwrite file
+    public void writeToFileOverwrite(String output, String filename) {
         try {
-            String str = String.join(" ", args);
-            if (operand.equals(">")) {
-                Files.write(Paths.get(filename), str.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-            } else if (operand.equals(">>")) {
-                Files.write(Paths.get(filename), str.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-            }
-        } catch (Exception e) {
-            System.out.println("Error writing to file: " + e.getMessage());
+            Files.write(Paths.get(filename), output.getBytes(),
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (IOException e) {
+            System.out.println("Error writing to file (>): " + e.getMessage());
         }
     }
+    
+    // For ">>" — append to file
+    public void writeToFileAppend(String output, String filename) {
+        try {
+            Files.write(Paths.get(filename), output.getBytes(),
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            System.out.println("Error writing to file (>>): " + e.getMessage());
+        }
+    }
+    
+    // Optional helper to detect and handle > or >>
+    public boolean redirectOutput(String output, String[] args) {
+        if (args.length >= 2) {
+            String operand = args[args.length - 2];
+            String filename = args[args.length - 1];
 
+            if (operand.equals(">")) {
+                writeToFileOverwrite(output, filename);
+                return true;
+            } else if (operand.equals(">>")) {
+                writeToFileAppend(output, filename);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // echo command : print the args in terminal 
     public void echo() {
         try {
-            String[] ss = parser.getArgs();
-            if (ss.length >= 2 && (ss[ss.length - 2].equals(">") || ss[ss.length - 2].equals(">>"))) {
-                String operator = ss[ss.length - 2];
-                String fileName = ss[ss.length - 1];
-                String[] newSS = Arrays.copyOfRange(ss, 0, ss.length - 2);
-                writeToFile(newSS, operator, fileName);
-            } else {
-                for (String rr : ss) {
-                    System.out.print(rr + " ");
+            String[] args = parser.getArgs();
+            if (args.length == 0) return;
+
+            // If > or >> exist, get text before them only
+            String output;
+            if (args.length >= 2 && (args[args.length - 2].equals(">") || args[args.length - 2].equals(">>"))) {
+                output = String.join(" ", Arrays.copyOf(args, args.length - 2));
+                String operand = args[args.length - 2];
+                String filename = args[args.length - 1];
+
+                if (operand.equals(">")) {
+                    writeToFileOverwrite(output, filename);
+                } else {
+                    writeToFileAppend(output, filename);
                 }
-                System.out.println();
+            } else {
+                output = String.join(" ", args);
+                System.out.println(output);
             }
         } catch (Exception e) {
             System.out.println("Error in echo: " + e.getMessage());
@@ -249,56 +331,60 @@ public class Terminal {
         }
     }
 
+    // cat command : 
     public void cat() {
         try {
             String[] args = parser.getArgs();
-            if (args.length == 0)
-                throw new IllegalArgumentException("cat command needs at least 1 file");
-            String operand = null, outputFile = null;
-            int fileCount = args.length;
-            if (args.length >= 2 && (args[args.length - 2].equals(">") || args[args.length - 2].equals(">>"))) {
-                operand = args[args.length - 2];
-                outputFile = args[args.length - 1];
-                fileCount = args.length - 2;
+            if (args.length == 0) {
+                System.out.println("Usage: cat <file> [file2...]");
+                return;
             }
+
             StringBuilder output = new StringBuilder();
-            for (int i = 0; i < fileCount; i++) {
-                Path path = Paths.get(args[i]);
-                if (!Files.exists(path))
-                    throw new FileNotFoundException("File not found: " + args[i]);
-                try (Stream<String> lines = Files.lines(path)) {
-                    lines.forEach(line -> output.append(line).append(System.lineSeparator()));
+            for (String fileName : args) {
+                if (fileName.equals(">") || fileName.equals(">>")) break;
+                Path filePath = Paths.get(fileName);
+                if (!Files.exists(filePath)) {
+                    System.out.println("File not found: " + fileName);
+                    return;
                 }
+                Files.lines(filePath).forEach(line -> output.append(line).append(System.lineSeparator()));
             }
-            System.out.print(output.toString());
-            if (operand != null && outputFile != null)
-                writeToFile(new String[]{output.toString()}, operand, outputFile);
+
+            if (!redirectOutput(output.toString(), args)) {
+                System.out.print(output.toString());
+            }
+
         } catch (Exception e) {
             System.out.println("Error in cat: " + e.getMessage());
         }
     }
 
+
+    // ls command
     public void ls() {
         try {
             String[] args = parser.getArgs();
             StringBuilder output = new StringBuilder();
+
             File currentDir = new File(System.getProperty("user.dir"));
             File[] files = currentDir.listFiles();
+
             if (files == null) {
                 System.out.println("Error reading directory");
                 return;
             }
+
             for (File f : files) {
-                if (f.isDirectory())
-                    output.append("[DIR]  ").append(f.getName()).append("\n");
-                else
-                    output.append("       ").append(f.getName()).append("\n");
+                output.append(f.isDirectory() ? "[DIR]  " : "       ")
+                      .append(f.getName()).append("\n");
             }
-            if (args.length >= 2 && (args[0].equals(">") || args[0].equals(">>"))) {
-                writeToFile(new String[]{output.toString()}, args[0], args[1]);
-            } else {
+
+            // Try redirect
+            if (!redirectOutput(output.toString(), args)) {
                 System.out.print(output.toString());
             }
+
         } catch (Exception e) {
             System.out.println("Error in ls: " + e.getMessage());
         }
