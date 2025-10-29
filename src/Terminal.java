@@ -284,6 +284,7 @@ public class Terminal {
         }
     }
 
+    // cp command ==> copy file content to another file 
     public void cp(Path source, Path destination) {
         try {
             Files.copy(source, destination, StandardCopyOption.REPLACE_EXISTING);
@@ -390,6 +391,7 @@ public class Terminal {
         }
     }
 
+    // wc command ==> Displays # of lines, words and chars in any file
     public void wc() {
         try {
             String[] args = parser.getArgs();
@@ -448,15 +450,19 @@ public class Terminal {
         }
     }
 
+ // rm command ==> remove files from directories
     public void rm() {
         try {
             String[] args = parser.getArgs();
-            if (args.length == 1) {
-                Path path = Paths.get(args[0]);
-                Files.delete(path);
-                System.out.println("File or directory deleted!");
-            } else {
-                System.out.println("Usage: rm <filename or directory>");
+            for (int i = 0; i < args.length; i++) {
+                Path path = Paths.get(args[i]);
+                
+                if (Files.exists(path)) {
+                    Files.delete(path);
+                    System.out.println(args[i] + " deleted!");
+                } else {
+                    System.out.println("Error: " + args[i] + " does not exist.");
+                }
             }
         } catch (Exception e) {
             System.out.println("Error in rm: " + e.getMessage());
@@ -530,4 +536,5 @@ public class Terminal {
             System.out.println("Error choosing command: " + e.getMessage());
         }
     }
-}
+                                     }
+                        
