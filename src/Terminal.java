@@ -395,25 +395,32 @@ public class Terminal {
     public void wc() {
         try {
             String[] args = parser.getArgs();
-            if (args.length != 1) {
+            if (args.length == 0) {
                 System.out.println("Usage: wc <filename>");
                 return;
             }
-            File file = new File(args[0]);
-            if (!file.exists() || file.isDirectory()) {
-                System.out.println("Error: file not found");
-                return;
-            }
-            int lines = 0, words = 0, bytes = 0;
-            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    lines++;
-                    words += line.split("\\s+").length;
-                    bytes += line.getBytes().length + 1;
+            int totalLines = 0, totalWords = 0, totalBytes = 0;
+            for(String filename : args) {
+                File file = new File(filename);
+                if (!file.exists() || file.isDirectory()) {
+                    System.out.println("Error: file not found");
+                    return;
                 }
+                int lines = 0, words = 0, bytes = 0;
+                try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        lines++;
+                        totalLines++;
+                        words += line.split("\\s+").length;
+                        totalWords += line.split("\\s+").length;
+                        totalBytes+= line.getBytes().length + 1;
+                        bytes += line.getBytes().length + 1;
+                    }
+                }
+            System.out.println(file + " " + lines + " " + words + " " + bytes + " ");
             }
-            System.out.println(lines + " " + words + " " + bytes + " " + file.getName());
+            System.out.println("Total: " + totalLines + " " + totalWords + " " + totalBytes);
         } catch (Exception e) {
             System.out.println("Error in wc: " + e.getMessage());
         }
