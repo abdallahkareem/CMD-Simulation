@@ -35,13 +35,12 @@
  *  =============================================================
  */
 
+import java.io.*;
+import java.nio.file.*;
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-import java.util.stream.Stream;
-import java.nio.file.*;
-import java.io.*;
 
 
 /**
@@ -459,22 +458,41 @@ public class Terminal {
 
  // rm command ==> remove files from directories
     public void rm() {
+    String[] args = parser.getArgs();
+
+    if (args.length == 0) {
+        System.out.println("Usage: rm <file1> <file2> ...");
+        return;
+    }
+
+    for (String fileName : args) {
+        Path path = Paths.get(fileName);
         try {
-            String[] args = parser.getArgs();
-            for (int i = 0; i < args.length; i++) {
-                Path path = Paths.get(args[i]);
-                
-                if (Files.exists(path)) {
-                    Files.delete(path);
-                    System.out.println(args[i] + " deleted!");
-                } else {
-                    System.out.println("Error: " + args[i] + " does not exist.");
-                }
+            if (Files.notExists(path)) {
+                System.out.println("Error: " + fileName + " does not exist.");
+                continue;
             }
-        } catch (Exception e) {
-            System.out.println("Error in rm: " + e.getMessage());
+
+            if (Files.isDirectory(path)) {
+                System.out.println("Error: " + fileName + " is a directory. Use rm -r to delete directories.");
+                continue;
+            }
+
+            Files.delete(path);
+            System.out.println("Deleted: " + fileName);
+
+        } catch (NoSuchFileException e) {
+            System.out.println("File not found: " + fileName);
+        } catch (DirectoryNotEmptyException e) {
+            System.out.println("Cannot delete directory (not empty): " + fileName);
+        } catch (IOException e) {
+            System.out.println("I/O error deleting " + fileName + ": " + e.getMessage());
+        } catch (SecurityException e) {
+            System.out.println("Permission denied deleting " + fileName);
         }
     }
+}
+
 
     public void unzip() {
         try {
